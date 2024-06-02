@@ -1,10 +1,10 @@
-import { RefObject, useEffect, useMemo, useState } from 'react';
+import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Input } from '../contexts/FormContext';
 import {
   AsyncValidationData,
   InvalidValidationData,
   ValidationData,
-  ValidationResponses,
+  ValidationResponse,
   ValidationState,
   Validator,
 } from '../validators/Validator';
@@ -33,6 +33,7 @@ export function useValidation(
   scrollToRef: RefObject<HTMLElement>
 ): useValidationResponse {
   const formContext = useFormContext();
+  const validationHash = useRef('');
   const [validityResponse, setValidityResponse] = useState<ValidityResponse>([
     ValidationState.PENDING,
     [],
@@ -56,23 +57,31 @@ export function useValidation(
    * It's a test to use useMemo instead. It makes the validation synchronous. Might not work with async validators
    */
   useMemo(() => {
-    const response = validate(value, validators);
-    setValidityResponse(response);
+    validationHash.current = Date.now().toString();
+    const hash = validationHash.current + '';
 
-    /**
-     * If the value is unreasonable then the validator can chose to active validation
-     */
-    if (response[0] === ValidationState.INVALID && response[2] === true) {
-      setErrorsForcedByValidator(true);
-    }
+    validate(value, validators, (validityResponse: ValidityResponse) => {
+      if (hash !== validationHash.current) {
+        return;
+      }
 
-    /**
-     * If the input has been valid then we activate validation
-     */
-    // if (response[0] === ValidationState.VALID) {
-    //   /* TODO: Do a follow up on this */
-    //   setErrorsForcedByValidator(true);
-    // }
+      setValidityResponse(validityResponse);
+
+      /**
+       * If the value is unreasonable then the validator can chose to active validation
+       */
+      if (response[0] === ValidationState.INVALID && response[2] === true) {
+        setErrorsForcedByValidator(true);
+      }
+
+      // TODO: Check if wanted (similar to forceErrors through validators)
+      /**
+       * If the input has been valid then we activate validation
+       */
+      // if (response[0] === ValidationState.VALID) {
+      //   setErrorsForcedByValidator(true);
+      // }
+    });
 
     /**
      * We do not want validators in here. This is to prevent new instances with the same logic
@@ -107,14 +116,46 @@ export function useValidation(
   return response;
 }
 
-function validate(value: unknown, validators: Validator[]): ValidityResponse {
+async function validate(
+  value: unknown,
+  validators: Validator[],
+  callback: (validityResponse: ValidityResponse) => void
+) {
   const validationData = runValidators(value, validators);
-  if (!isSyncStateList(validationData)) {
-    throw new Error('Async validators are not yet supported');
+
+  if (isSyncStateList(validationData)) {
+    evaluateValidation(validationData, callback);
+    return;
   }
 
+  // Wait 300ms to set PENDING state to reduce flickering
+  const pendingTimeout = setTimeout(
+    () => callback([ValidationState.PENDING, []]),
+    300
+  );
+
+  const status = await promiseState(Promise.all(validationData));
+
+  if (status !== 'pending') {
+    clearTimeout(pendingTimeout);
+    evaluateValidation(await Promise.all(validationData), callback);
+    return;
+  }
+
+  // Awaiting the promises before clearTimeout will make sure we only show PENDING state when needed
+  const data = await Promise.all(validationData);
+
+  clearTimeout(pendingTimeout);
+  evaluateValidation(data, callback);
+}
+
+function evaluateValidation(
+  validationData: ValidationData[],
+  callback: (validityResponse: ValidityResponse) => void
+) {
   if (isValid(validationData)) {
-    return [ValidationState.VALID, []];
+    callback([ValidationState.VALID, []]);
+    return;
   }
 
   const errors = validationData
@@ -129,19 +170,17 @@ function validate(value: unknown, validators: Validator[]): ValidityResponse {
       data.state === ValidationState.INVALID && data.forceErrors === true
   );
 
-  return [ValidationState.INVALID, errors, forceErrors];
+  callback([ValidationState.INVALID, errors, forceErrors]);
 }
 
 function runValidators(
   value: unknown,
   validators: Validator[]
-): ValidationResponses[] {
+): ValidationResponse[] {
   return validators.map((validator) => validator.validate(value));
 }
 
-function isSyncStateList(
-  data: ValidationResponses[]
-): data is ValidationData[] {
+function isSyncStateList(data: ValidationResponse[]): data is ValidationData[] {
   return data.every(
     (data) =>
       typeof data === 'object' &&
@@ -155,4 +194,14 @@ function isValid(data: ValidationData[]) {
 
 function getComparators(validators: Validator[]) {
   return validators.map((validator) => validator.getComparator()).join('|');
+}
+
+function promiseState<T>(
+  p: Promise<T>
+): Promise<'pending' | 'fulfilled' | 'rejected'> {
+  const t = {};
+  return Promise.race([t, p]).then(
+    (v) => (v === t ? 'pending' : 'fulfilled'),
+    () => 'rejected'
+  );
 }

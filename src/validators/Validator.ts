@@ -1,7 +1,7 @@
 export enum ValidationState {
-  VALID = "VALID",
-  INVALID = "INVALID",
-  PENDING = "PENDING",
+  VALID = 'VALID',
+  INVALID = 'INVALID',
+  PENDING = 'PENDING',
 }
 
 export interface ValidValidationData {
@@ -25,7 +25,7 @@ export type ValidationData =
 
 export type AsyncValidationData = Promise<ValidationData>;
 
-export type ValidationResponses = ValidationData | AsyncValidationData;
+export type ValidationResponse = ValidationData | AsyncValidationData;
 
 export abstract class Validator {
   protected abstract id: string;
@@ -36,10 +36,10 @@ export abstract class Validator {
   }
 
   public getComparator() {
-    return this.id + "_" + this.error;
+    return this.id + '_' + this.error;
   }
 
-  abstract validate(value: unknown): ValidationResponses;
+  abstract validate(value: unknown): ValidationResponse;
 }
 
 export interface ValidationProps {

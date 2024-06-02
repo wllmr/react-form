@@ -1,8 +1,5 @@
-import {
-  AsyncValidationData,
-  ValidationState,
-  Validator,
-} from '../src/validators/Validator';
+import { AsyncValidationData } from '../src';
+import { ValidationState, Validator } from '../src/validators/Validator';
 
 export class AsyncMinLengthValidator extends Validator {
   protected id: string = 'AsyncMinLengthValidator';
@@ -16,12 +13,12 @@ export class AsyncMinLengthValidator extends Validator {
   async validate(value: unknown): AsyncValidationData {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    if (typeof value === 'string' && value.length > this.minLength) {
-      return {
-        state: ValidationState.INVALID,
-        error: this.error,
-        forceErrors: true,
-      };
+    if (
+      typeof value === 'string' &&
+      value.length > 0 &&
+      value.length < this.minLength
+    ) {
+      return { state: ValidationState.INVALID, error: this.error };
     }
 
     return { state: ValidationState.VALID };
