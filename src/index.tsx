@@ -12,25 +12,14 @@ export type {
   ValidationResponse as ValidationResponses,
 } from './validators/Validator';
 
-import { EmailValidator } from './validators/EmailValidator';
-import { MaxDateValidator } from './validators/MaxDateValidator';
-import { MaxLengthValidator } from './validators/MaxLengthValidator';
-import { MaxValidator } from './validators/MaxValidator';
-import { MinDateValidator } from './validators/MinDateValidator';
-import { MinLengthValidator } from './validators/MinLengthValidator';
-import { NumberValidator } from './validators/NumberValidator';
-import { RequiredValidator } from './validators/RequiredValidator';
-import { TruthyValidator } from './validators/TruthyValidator';
-export const validators = {
-  EmailValidator,
-  MaxDateValidator,
-  MaxLengthValidator,
-  MaxValidator,
-  MinDateValidator,
-  MinLengthValidator,
-  NumberValidator,
-  RequiredValidator,
-  TruthyValidator,
-};
+export { EmailValidator } from './validators/EmailValidator';
+export { MaxDateValidator } from './validators/MaxDateValidator';
+export { MaxLengthValidator } from './validators/MaxLengthValidator';
+export { MaxValidator } from './validators/MaxValidator';
+export { MinDateValidator } from './validators/MinDateValidator';
+export { MinLengthValidator } from './validators/MinLengthValidator';
+export { NumberValidator } from './validators/NumberValidator';
+export { RequiredValidator } from './validators/RequiredValidator';
+export { TruthyValidator } from './validators/TruthyValidator';
 
 export * from './hooks/useValidation';
