@@ -1,5 +1,52 @@
 import { Meta } from '@storybook/addon-docs';
 
-<Meta title="Components/InputBase" />
+<Meta title="Suggested Components/InputBase" />
 
 # InputBase
+
+A component or CVA that handles stylings for the input field. States to be handle are:
+
+- unfocused (default)
+- focused
+- invalid
+- pending
+
+### Basic example - CVA
+
+Problem with this is that you need to handle all the states in js.
+
+```tsx
+import { cva } from 'class-variance-authority';
+
+export const inputBase = cva(
+  '...', // Base styles
+  {
+    variants: {
+      state: {
+        unfocused: '...', // Default state
+        focused: '...', // Focused state
+        invalid: '...', // Invalid state
+        pending: '...', // Pending state
+      },
+    },
+    defaultVariants: {
+      state: 'unfocused', // Default state
+    },
+  }
+);
+```
+
+### Basic example - classes
+
+Problem with this is that is hard to read and maintain.
+
+```tsx
+import { cx } from 'class-variance-authority';
+
+export const inputBase = cx(
+  '...', // Default state
+  'focus:not([data-invalid=invalid]):...', // Focused state
+  '[data-state=invalid]:...', // Invalid state
+  '[data-state=pending]:...' // Pending state
+);
+```

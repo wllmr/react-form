@@ -1,5 +1,21 @@
 import { Meta } from '@storybook/addon-docs';
 
-<Meta title="Components/Label" />
+<Meta title="Suggested Components/Label" />
 
 # Label
+
+A component that handles label for inputs, more specific the following:
+
+- stylings
+- behaviour
+- a11y
+
+### Basic example
+
+```tsx
+export type LabelProps = JSX.IntrinsicElements['label'];
+
+export const Label = ({ ...props }: LabelProps) => {
+  return <label {...props} />;
+};
+```

@@ -1,5 +1,51 @@
 import { Meta } from '@storybook/addon-docs';
 
-<Meta title="Components/FormErrors" />
+<Meta title="Suggested Components/FormErrors" />
 
 # FormErrors
+
+A component that displayed errors after form has been submitted.
+
+### Basic example
+
+```tsx
+export interface FormErrorsProps {
+  id: string;
+  validity: ValidationState;
+  errors: string[];
+  showErrors: boolean;
+}
+
+export const FormErrors = ({
+  id,
+  validity,
+  errors,
+  showErrors,
+}: InputErrorsProps) => {
+  if (!showErrors) {
+    return null;
+  }
+
+  if (validity !== ValidationState.INVALID) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-1 bg-red-300">
+      {errors.map((error) => (
+        <a
+          key={`${id}_${error}_form`}
+          role="alert"
+          aria-live="polite"
+          href="#"
+          className="text-white"
+        >
+          {error}
+        </a>
+      ))}
+    </div>
+  );
+};
+```
+
+You also need to add all error id's generated to the input field attribute **aria-describedby=\"id1 id2\"**.

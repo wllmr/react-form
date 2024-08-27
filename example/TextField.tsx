@@ -10,6 +10,7 @@ export const TextField = ({ value, onChange, validators }: TextFieldProps) => {
   const ref = useRef<HTMLInputElement>(null);
   const id = `TextField_${useId}`;
   const [validity, errors, forceErrors] = useValidation(
+    '',
     value,
     validators,
     id,

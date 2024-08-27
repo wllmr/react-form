@@ -20,7 +20,7 @@ type PendingResponse = [validity: ValidationState.PENDING, errors: string[]];
 
 type ValidityResponse = ValidResponse | InvalidResponse | PendingResponse;
 
-type useValidationResponse = [
+type UseValidationResponse = [
   validity: ValidationState,
   errors: string[],
   showErrors: boolean,
@@ -32,7 +32,7 @@ export function useValidation(
   validators: Validator[] = [],
   id: string,
   scrollToRef: RefObject<HTMLElement>
-): useValidationResponse {
+): UseValidationResponse {
   const formContext = useFormContext();
   const validationHash = useRef('');
 
@@ -43,7 +43,7 @@ export function useValidation(
   ]);
   const [errorsForcedByValidator, setErrorsForcedByValidator] = useState(false);
 
-  const response = useMemo<useValidationResponse>(() => {
+  const response = useMemo<UseValidationResponse>(() => {
     return [
       validityResponse[0],
       validityResponse[1],
@@ -106,7 +106,7 @@ export function useValidation(
     return () => {
       removeInput?.();
     };
-  }, [formContext, id, value, scrollToRef, serializedResponse]);
+  }, [formContext, id, value, scrollToRef, serializedResponse, label]);
 
   return response;
 }

@@ -1,10 +1,10 @@
-import React, { createContext, RefObject } from 'react';
+import { createContext, ReactNode, RefObject } from 'react';
 import { ValidationState } from '../validators/Validator';
 
 export class Input {
   constructor(
     public id: string,
-    public label: string | React.ReactNode,
+    public label: string | ReactNode,
     public value: unknown,
     public validationState: ValidationState,
     public resetValidation: () => void,

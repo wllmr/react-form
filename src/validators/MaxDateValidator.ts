@@ -43,7 +43,7 @@ function isValidDate(dateString: string) {
   try {
     Temporal.PlainDate.from(dateString);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

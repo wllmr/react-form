@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import path from 'path';
 
 export default defineConfig({
   plugins: [
@@ -20,7 +21,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
-      external: ['react', 'react-dom', '@js-temporal/polyfill'],
+      external: ['react', 'react-dom'],
       output: {
         globals: {
           react: 'React',
@@ -28,6 +29,14 @@ export default defineConfig({
           '@js-temporal/polyfill': 'Temporal',
         },
       },
+    },
+  },
+  resolve: {
+    alias: {
+      '@js-temporal/polyfill': path.resolve(
+        __dirname,
+        'node_modules/@js-temporal/polyfill'
+      ),
     },
   },
 });

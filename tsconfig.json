@@ -1,26 +1,45 @@
 {
   "compilerOptions": {
+    /* Target ES2020 for modern JavaScript features */
     "target": "ES2020",
+
+    /* Use define for class fields, required for modern class field syntax */
     "useDefineForClassFields": true,
+
+    /* Include necessary libraries for browser and TypeScript */
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    /* Use ESNext for client-side module system */
     "module": "ESNext",
+
+    /* Skip type checking for declaration files (optional, keeps build fast) */
     "skipLibCheck": true,
 
-    /* Bundler mode */
+    /* Use moduleResolution compatible with bundlers (like Vite) */
     "moduleResolution": "bundler",
+
+    /* Allow importing TypeScript files with extensions (required for Vite) */
     "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
+
+    /* Compile each file as a separate module (required for bundlers like Vite) */
     "isolatedModules": true,
+
+    /* Ensure that module imports are detected even if not explicitly stated */
+    "moduleDetection": "force",
+
+    /* Prevent emitting JavaScript output files (handled by Vite) */
     "noEmit": true,
+
+    /* Configure JSX for React with modern JSX runtime */
     "jsx": "react-jsx",
 
-    /* Linting */
+    /* Strict TypeScript settings for better type checking */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "example/Form.stories.tsx"],
-  "exclude": ["node_modules"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+
+  /* Include source files for the TypeScript compiler */
+  "include": ["src", "example"]
 }

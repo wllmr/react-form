@@ -1,5 +1,45 @@
 import { Meta } from '@storybook/addon-docs';
 
-<Meta title="Components/InputErrors" />
+<Meta title="Suggested Components/InputErrors" />
 
 # InputErrors
+
+A component that displayed errors along the inputs.
+
+### Basic example
+
+```tsx
+export interface InputErrorsProps {
+  id: string;
+  validity: ValidationState;
+  errors: string[];
+  showErrors: boolean;
+}
+
+export const InputErrors = ({
+  id,
+  validity,
+  errors,
+  showErrors,
+}: InputErrorsProps) => {
+  if (!showErrors) {
+    return null;
+  }
+
+  if (validity !== ValidationState.INVALID) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      {errors.map((error) => (
+        <span key={`${id}_${error}`} role="alert" aria-live="polite">
+          {error}
+        </span>
+      ))}
+    </div>
+  );
+};
+```
+
+You also need to add all error id's generated to the input field attribute **aria-describedby=\"id1 id2\"**.
