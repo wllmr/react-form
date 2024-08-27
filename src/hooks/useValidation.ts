@@ -27,6 +27,7 @@ type useValidationResponse = [
 ];
 
 export function useValidation(
+  label: string | React.ReactNode,
   value: unknown,
   validators: Validator[] = [],
   id: string,
@@ -34,6 +35,8 @@ export function useValidation(
 ): useValidationResponse {
   const formContext = useFormContext();
   const validationHash = useRef('');
+
+  // State to be used in the response
   const [validityResponse, setValidityResponse] = useState<ValidityResponse>([
     ValidationState.PENDING,
     [],
@@ -54,11 +57,12 @@ export function useValidation(
   ]);
 
   /**
-   * It's a test to use useMemo instead. It makes the validation synchronous. Might not work with async validators
+   * Runs the validators if value or comparators are changed
    */
-  useMemo(() => {
+  useEffect(() => {
     validationHash.current = Date.now().toString();
-    const hash = validationHash.current + '';
+    // Prevents async validators from updating the state if a new validation is started
+    const hash = `${validationHash.current}`;
 
     validate(value, validators, (validityResponse: ValidityResponse) => {
       if (hash !== validationHash.current) {
@@ -67,20 +71,10 @@ export function useValidation(
 
       setValidityResponse(validityResponse);
 
-      /**
-       * If the value is unreasonable then the validator can chose to active validation
-       */
+      // If the value is unreasonable then the validator can chose to active validation
       if (response[0] === ValidationState.INVALID && response[2] === true) {
         setErrorsForcedByValidator(true);
       }
-
-      // TODO: Check if wanted (similar to forceErrors through validators)
-      /**
-       * If the input has been valid then we activate validation
-       */
-      // if (response[0] === ValidationState.VALID) {
-      //   setErrorsForcedByValidator(true);
-      // }
     });
 
     /**
@@ -90,6 +84,7 @@ export function useValidation(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, getComparators(validators)]);
 
+  // This will not trigger if string ends up the same
   const serializedResponse = JSON.stringify(validityResponse);
 
   useEffect(() => {
@@ -97,15 +92,15 @@ export function useValidation(
       serializedResponse
     ) as ValidityResponse;
 
-    const input = new Input({
+    const input = new Input(
       id,
-      label: undefined,
-      value: value,
-      validationState: deepCheckedResponse[0],
-      resetValidation: () => {},
-      errors: deepCheckedResponse[1],
-      scrollToRef,
-    });
+      label,
+      value,
+      deepCheckedResponse[0],
+      () => {},
+      deepCheckedResponse[1],
+      scrollToRef
+    );
     const removeInput = formContext?.setInput(input);
 
     return () => {
@@ -123,7 +118,7 @@ async function validate(
 ) {
   const validationData = runValidators(value, validators);
 
-  if (isSyncStateList(validationData)) {
+  if (isValidatorsSynchronous(validationData)) {
     evaluateValidation(validationData, callback);
     return;
   }
@@ -136,19 +131,50 @@ async function validate(
 
   const status = await promiseState(Promise.all(validationData));
 
-  if (status !== 'pending') {
-    clearTimeout(pendingTimeout);
-    evaluateValidation(await Promise.all(validationData), callback);
-    return;
+  switch (status) {
+    // In this case we know all promises are resolved so we can evaluate the validation
+    case 'fulfilled': {
+      // Clear the timeout if the validation has already been resolved to prevent PENDING from showing
+      clearTimeout(pendingTimeout);
+
+      const data = await Promise.all(validationData);
+
+      evaluateValidation(data, callback);
+      break;
+    }
+
+    // Since not all promises are resolved we need to await the promises and then evaluate the validation
+    case 'pending': {
+      // Since we don't want to show PENDING state if the validation is resolved within 300ms we await the promises first
+      try {
+        const data = await Promise.all(validationData);
+        clearTimeout(pendingTimeout);
+        evaluateValidation(data, callback);
+      } catch (error) {
+        // We got a rejection. It could be because of bad network or similar if its async validation
+        console.error(error);
+      }
+
+      break;
+    }
+
+    // Skip evaluation since promis is rejected. Could be because of bad network or similar if its a async validation
+    case 'rejected': {
+      // Clear the timout if the validation has already been resolved to prevent pending from showing
+      clearTimeout(pendingTimeout);
+
+      console.error(
+        "Validation promise is rejected - We shouldn't end up here"
+      );
+
+      break;
+    }
   }
-
-  // Awaiting the promises before clearTimeout will make sure we only show PENDING state when needed
-  const data = await Promise.all(validationData);
-
-  clearTimeout(pendingTimeout);
-  evaluateValidation(data, callback);
 }
 
+/**
+ * Evaluates the validation data can calls the callback with the result
+ */
 function evaluateValidation(
   validationData: ValidationData[],
   callback: (validityResponse: ValidityResponse) => void
@@ -180,10 +206,13 @@ function runValidators(
   return validators.map((validator) => validator.validate(value));
 }
 
-function isSyncStateList(data: ValidationResponse[]): data is ValidationData[] {
+function isValidatorsSynchronous(
+  data: ValidationResponse[]
+): data is ValidationData[] {
   return data.every(
     (data) =>
       typeof data === 'object' &&
+      data !== null &&
       typeof (data as AsyncValidationData).then === 'undefined'
   );
 }

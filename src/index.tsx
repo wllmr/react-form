@@ -9,7 +9,7 @@ export type {
   ValidValidationData,
   ValidationData,
   ValidationProps,
-  ValidationResponse as ValidationResponses,
+  ValidationResponse,
 } from './validators/Validator';
 
 export { EmailValidator } from './validators/EmailValidator';

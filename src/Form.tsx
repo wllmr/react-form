@@ -2,19 +2,18 @@ import React, {
   DetailedHTMLProps,
   FormEvent,
   FunctionComponent,
-  ReactNode,
   memo,
   useCallback,
   useRef,
   useState,
-} from "react";
-import { FormContext, Input } from "./contexts/FormContext";
-import { ValidationState } from "./validators/Validator";
+} from 'react';
+import { FormContext, Input } from './contexts/FormContext';
+import { ValidationState } from './validators/Validator';
 
 interface Props
   extends Omit<
     DetailedHTMLProps<React.HTMLAttributes<HTMLFormElement>, HTMLFormElement>,
-    "onSubmit"
+    'onSubmit'
   > {
   onSubmit?: (form: FormData, event: React.FormEvent<HTMLFormElement>) => void;
 }
@@ -34,8 +33,8 @@ export const Form: FunctionComponent<Props> = memo(
           formData.current.inputs
             .find((input) => input.isInvalid)
             ?.scrollToRef.current?.scrollIntoView({
-              behavior: "smooth",
-              inline: "center",
+              behavior: 'smooth',
+              inline: 'center',
             });
         }
 
@@ -51,18 +50,13 @@ export const Form: FunctionComponent<Props> = memo(
     return (
       <form onSubmit={internalOnSubmit} {...props} noValidate>
         <FormContext.Provider value={{ setInput, hasBeenSubmitted }}>
-          <ReRenderProtection>{children}</ReRenderProtection>
+          {children}
         </FormContext.Provider>
       </form>
     );
   }
 );
-Form.displayName = "Form";
-
-const ReRenderProtection = memo(({ children }: { children: ReactNode }) => {
-  return <React.Fragment>{children}</React.Fragment>;
-});
-ReRenderProtection.displayName = "ReRenderProtection";
+Form.displayName = 'Form';
 
 class FormData {
   public inputs: Input[] = [];
