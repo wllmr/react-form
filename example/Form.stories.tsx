@@ -4,7 +4,8 @@ import { Form } from '../src/Form';
 import { MinLengthValidator } from '../src/validators/MinLengthValidator';
 import { RequiredValidator } from '../src/validators/RequiredValidator';
 import { AsyncMinLengthValidator } from './AsyncMinLengthValidator';
-import { TextField } from './TextField';
+import { Button } from './inputs/Button';
+import { TextField } from './inputs/TextField';
 
 const meta: Meta<typeof Form> = {
   component: Form,
@@ -22,28 +23,30 @@ const Template = () => {
     <Form
       onSubmit={(form) => {
         form.inputs.map((i) => i.errors);
+
+        console.log(form.inputs.map((i) => i.errors));
       }}
-      style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+      className="flex flex-col gap-6"
     >
-      <label>Sync validators</label>
       <TextField
+        label="Sync validators"
         value={text}
-        onChange={setText}
+        onChange={(event) => setText(event.target.value)}
         validators={[
           new RequiredValidator('Field is required'),
           new MinLengthValidator(5, 'Min length is 5'),
         ]}
       />
-      <label>Async validators</label>
       <TextField
+        label="Async validators"
         value={textAsync}
-        onChange={setTextAsync}
+        onChange={(event) => setTextAsync(event.target.value)}
         validators={[
           new RequiredValidator('Field is required'),
           new AsyncMinLengthValidator(5, 'Min length is 5'),
         ]}
       />
-      <button type="submit">submit</button>
+      <Button type="submit">submit</Button>
     </Form>
   );
 };

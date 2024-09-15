@@ -1,4 +1,11 @@
-import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ForwardedRef,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Input } from '../contexts/FormContext';
 import {
   AsyncValidationData,
@@ -26,12 +33,12 @@ type UseValidationResponse = [
   showErrors: boolean,
 ];
 
-export function useValidation(
-  label: string | React.ReactNode,
+export function useValidation<TRef extends HTMLElement>(
+  label: ReactNode,
   value: unknown,
   validators: Validator[] = [],
   id: string,
-  scrollToRef: RefObject<HTMLElement>
+  scrollToRef: ForwardedRef<TRef>
 ): UseValidationResponse {
   const formContext = useFormContext();
   const validationHash = useRef('');
@@ -158,9 +165,9 @@ async function validate(
       break;
     }
 
-    // Skip evaluation since promis is rejected. Could be because of bad network or similar if its a async validation
+    // Skip evaluation since promise is rejected. Could be because of bad network or similar if its a async validation
     case 'rejected': {
-      // Clear the timout if the validation has already been resolved to prevent pending from showing
+      // Clear the timeout if the validation has already been resolved to prevent pending from showing
       clearTimeout(pendingTimeout);
 
       console.error(

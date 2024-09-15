@@ -8,10 +8,8 @@ Download the package and run
 
 ```bash
 bun install
-bun run storybook
+bun dev
 ```
-
-The server should start and you can find it at [localhost:6006](http://localhost:6006/)
 
 ## Usage
 

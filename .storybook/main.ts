@@ -1,17 +1,19 @@
 import { StorybookConfig } from '@storybook/react-vite';
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(ts|tsx)',
+    '../example/**/*.mdx',
+    '../example/**/*.stories.@(ts|tsx)',
+  ],
   addons: [
     '@storybook/addon-essentials',
     '@storybook/addon-interactions',
     '@storybook/addon-links',
     '@storybook/addon-backgrounds',
   ],
-  framework: {
-    name: '@storybook/react-vite',
-    options: {},
-  },
+  framework: '@storybook/react-vite',
   core: {
     builder: '@storybook/builder-vite',
   },
@@ -19,4 +21,5 @@ const config: StorybookConfig = {
     check: true,
   },
 };
+
 export default config;
