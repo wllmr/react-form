@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { MaxLengthValidator } from '../src';
 import { Form } from '../src/Form';
 import { MinLengthValidator } from '../src/validators/MinLengthValidator';
 import { RequiredValidator } from '../src/validators/RequiredValidator';
@@ -35,6 +36,7 @@ const Template = () => {
         validators={[
           new RequiredValidator('Field is required'),
           new MinLengthValidator(5, 'Min length is 5'),
+          new MaxLengthValidator(10, 'Max length is 10'),
         ]}
       />
       <TextField

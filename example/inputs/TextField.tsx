@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { useValidation, ValidationState } from '../../src';
 import { InputBaseProps } from './base/input.type';
-import { InputErrors } from './base/InputErrors';
+import { createInputErrorId, InputErrors } from './base/InputErrors';
 import { Label } from './base/Label';
 
 export interface TextFieldProps
@@ -32,8 +32,8 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
     );
 
     return (
-      <div className={className}>
-        <Label className="bg-red pb-1" htmlFor={id}>
+      <div className={cx('flex flex-col gap-1', className)}>
+        <Label className="bg-red" htmlFor={id}>
           {label}
         </Label>
         <input
@@ -41,14 +41,19 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
           id={id}
           type={type}
           className={cx(
-            'flex h-10 w-full rounded-md border border-input outline-none bg-background px-3 py-2 text-sm placeholder:text-muted-foreground',
+            'flex h-10 w-full rounded-sm border-2 border-input outline-none bg-background px-3 py-2 text-sm placeholder:text-muted-foreground',
             {
-              'border-red-400':
+              'border-red-600':
                 validity === ValidationState.INVALID && showErrors,
-              'border-blue-400':
+              'border-blue-600':
                 validity === ValidationState.PENDING && showErrors,
             }
           )}
+          aria-describedby={
+            showErrors && validity === ValidationState.INVALID
+              ? errors.map((error) => createInputErrorId(id, error)).join(' ')
+              : undefined
+          }
           ref={ref}
         />
         <InputErrors

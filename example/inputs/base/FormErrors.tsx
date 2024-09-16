@@ -7,7 +7,7 @@ interface FormErrorProps {
 }
 
 export const FormError = ({ validity, errors, showErrors }: FormErrorProps) => {
-  if (validity === ValidationState.INVALID) {
+  if (validity !== ValidationState.INVALID) {
     return null;
   }
 
@@ -20,10 +20,19 @@ export const FormError = ({ validity, errors, showErrors }: FormErrorProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       {errors.map(([fieldId, error]) => (
-        <span id={`${fieldId}_${error}`}>{error}</span>
+        <span
+          id={createFormErrorId(fieldId, error)}
+          className="text-sm font-bold text-red-600"
+        >
+          {error}
+        </span>
       ))}
     </div>
   );
 };
+
+export function createFormErrorId(fieldId: string, error: string) {
+  return `${fieldId}_form_error_${error.replace(/ /g, '_')}`;
+}

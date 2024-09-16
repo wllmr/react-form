@@ -13,7 +13,7 @@ export const InputErrors = ({
   errors,
   showErrors,
 }: InputErrorsProps) => {
-  if (validity === ValidationState.INVALID) {
+  if (validity !== ValidationState.INVALID) {
     return null;
   }
 
@@ -26,10 +26,19 @@ export const InputErrors = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       {errors.map((error) => (
-        <span id={`${fieldId}_${error}`}>{error}</span>
+        <span
+          id={createInputErrorId(fieldId, error)}
+          className="text-sm font-bold text-red-600"
+        >
+          {error}
+        </span>
       ))}
     </div>
   );
 };
+
+export function createInputErrorId(fieldId: string, error: string) {
+  return `${fieldId}_input_error_${error.replace(/ /g, '_')}`;
+}

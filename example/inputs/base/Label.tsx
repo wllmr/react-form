@@ -9,5 +9,5 @@ export const Label = ({ className, ...props }: LabelProps) => {
     return null;
   }
 
-  return <label {...props} className={cx(className, 'font-bold text-sm')} />;
+  return <label {...props} className={cx('font-bold text-sm', className)} />;
 };
