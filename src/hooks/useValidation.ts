@@ -33,12 +33,12 @@ type UseValidationResponse = [
   showErrors: boolean,
 ];
 
-export function useValidation<TRef extends HTMLElement>(
+export function useValidation(
   label: ReactNode,
   value: unknown,
   validators: Validator[] = [],
   id: string,
-  scrollToRef: ForwardedRef<TRef>
+  scrollToRef: ForwardedRef<HTMLElement>
 ): UseValidationResponse {
   const formContext = useFormContext();
   const validationHash = useRef('');
@@ -131,6 +131,7 @@ async function validate(
   }
 
   // Wait 300ms to set PENDING state to reduce flickering
+  // TODO: Maybe set min time the PENDING state is shown?
   const pendingTimeout = setTimeout(
     () => callback([ValidationState.PENDING, []]),
     300
@@ -140,7 +141,7 @@ async function validate(
 
   switch (status) {
     // In this case we know all promises are resolved so we can evaluate the validation
-    case 'fulfilled': {
+    case 'resolved': {
       // Clear the timeout if the validation has already been resolved to prevent PENDING from showing
       clearTimeout(pendingTimeout);
 
@@ -228,16 +229,22 @@ function isValid(data: ValidationData[]) {
   return data.every((data) => data.state === ValidationState.VALID);
 }
 
+/**
+ * List of unique strings for each validator used in the form
+ * Used to check if any validator has been update
+ */
 function getComparators(validators: Validator[]) {
   return validators.map((validator) => validator.getComparator()).join('|');
 }
 
 function promiseState<T>(
   p: Promise<T>
-): Promise<'pending' | 'fulfilled' | 'rejected'> {
+): Promise<'pending' | 'resolved' | 'rejected'> {
   const t = {};
+
+  // Evaluate if the promise is pending
   return Promise.race([t, p]).then(
-    (v) => (v === t ? 'pending' : 'fulfilled'),
+    (v) => (v === t ? 'pending' : 'resolved'),
     () => 'rejected'
   );
 }

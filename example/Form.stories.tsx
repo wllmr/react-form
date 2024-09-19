@@ -7,6 +7,7 @@ import { RequiredValidator } from '../src/validators/RequiredValidator';
 import { AsyncMinLengthValidator } from './AsyncMinLengthValidator';
 import { Button } from './inputs/Button';
 import { TextField } from './inputs/TextField';
+import { FormError } from './inputs/base/FormErrors';
 
 const meta: Meta<typeof Form> = {
   component: Form,
@@ -25,7 +26,10 @@ const Template = () => {
       onSubmit={(form) => {
         form.inputs.map((i) => i.errors);
 
-        console.log(form.inputs.map((i) => i.errors));
+        console.log(
+          'SUBMIT',
+          form.inputs.map((i) => i.errors)
+        );
       }}
       className="flex flex-col gap-6"
     >
@@ -48,6 +52,8 @@ const Template = () => {
           new AsyncMinLengthValidator(5, 'Min length is 5'),
         ]}
       />
+
+      <FormError />
       <Button type="submit">submit</Button>
     </Form>
   );

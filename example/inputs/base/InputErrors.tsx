@@ -29,6 +29,7 @@ export const InputErrors = ({
     <div className="flex flex-col gap-1">
       {errors.map((error) => (
         <span
+          key={createInputErrorId(fieldId, error)}
           id={createInputErrorId(fieldId, error)}
           className="text-sm font-bold text-red-600"
         >
