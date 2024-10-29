@@ -13,7 +13,7 @@ export const InputErrors = ({
   errors,
   showErrors,
 }: InputErrorsProps) => {
-  if (validity !== ValidationState.INVALID) {
+  if (validity === ValidationState.VALID) {
     return null;
   }
 

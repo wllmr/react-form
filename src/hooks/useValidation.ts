@@ -71,8 +71,19 @@ export function useValidation(
         return;
       }
 
-      setValidityResponse(validityResponse);
-      formContext?.setFormErrors(scrollToId, validityResponse[1]);
+      // If pending is returned then we keep potential errors while showing the pending state.
+      // This is to reduce the flickering on the page.
+      setValidityResponse((current) => {
+        console.log(current);
+        if (validityResponse[0] === ValidationState.PENDING) {
+          return [ValidationState.PENDING, errors];
+        }
+        return validityResponse;
+      });
+
+      if (validityResponse[0] !== ValidationState.PENDING) {
+        formContext?.setFormErrors(scrollToId, validityResponse[1]);
+      }
 
       // If the value is unreasonable then the validator can chose to active validation
       if (response[0] === ValidationState.INVALID && response[2] === true) {
@@ -181,7 +192,7 @@ async function validate(
  */
 function evaluateValidation(
   validationData: ValidationData[],
-  callback: (validityResponse: ValidityResponse) => void
+  callback: (validityResponse: ValidResponse | InvalidResponse) => void
 ) {
   if (isValid(validationData)) {
     callback([ValidationState.VALID, []]);
