@@ -1,99 +1,89 @@
 import {
   DetailedHTMLProps,
   FormEvent,
+  forwardRef,
   HTMLAttributes,
   memo,
   useCallback,
+  useImperativeHandle,
   useRef,
   useState,
 } from 'react';
 import { FormContext, Input } from './contexts/FormContext';
-import { ValidationState } from './validators/Validator';
+import { FormData } from './FormData';
+
+export interface FormHandle {
+  formData: FormData;
+  submit: () => void;
+}
 
 interface FormProps
   extends Omit<
     DetailedHTMLProps<HTMLAttributes<HTMLFormElement>, HTMLFormElement>,
     'onSubmit'
   > {
-  onSubmit?: (form: FormData, event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit?: (form: FormData, event?: React.FormEvent<HTMLFormElement>) => void;
 }
 
-export const Form = memo(({ children, onSubmit, ...props }: FormProps) => {
-  const formData = useRef(new FormData());
-  const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
+export const Form = memo(
+  forwardRef<FormHandle, FormProps>(({ children, onSubmit, ...props }, ref) => {
+    const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
+    const [formErrors, _setFormErrors] = useState<Record<string, string[]>>({});
+    const formData = useRef(new FormData());
 
-  const internalOnSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      event.persist();
-      setHasBeenSubmitted(true);
+    const internalOnSubmit = useCallback(
+      (event?: FormEvent<HTMLFormElement>) => {
+        event?.preventDefault();
+        event?.persist();
+        setHasBeenSubmitted(true);
 
-      if (formData.current.isInvalid) {
-        formData.current.inputs
-          .find((input) => input.isInvalid)
-          ?.scrollToRef.current?.scrollIntoView({
+        if (formData.current.isInvalid) {
+          const input = formData.current.inputs.find(
+            (input) => input.isInvalid
+          );
+
+          if (input === null || typeof input === 'undefined') {
+            return;
+          }
+
+          document.getElementById(input.scrollToId)?.scrollIntoView({
             behavior: 'smooth',
-            inline: 'center',
+            block: 'center',
           });
-      }
+        }
 
-      onSubmit?.(formData.current, event);
-    },
-    [onSubmit]
-  );
+        onSubmit?.(formData.current, event);
+      },
+      [onSubmit]
+    );
 
-  const setInput = useCallback((input: Input) => {
-    return formData.current.setInput(input);
-  }, []);
+    const setFormErrors = useCallback((inputId: string, errors: string[]) => {
+      _setFormErrors((formErrors) => ({ ...formErrors, [inputId]: errors }));
+    }, []);
 
-  return (
-    <form onSubmit={internalOnSubmit} {...props} noValidate>
-      <FormContext.Provider value={{ setInput, hasBeenSubmitted }}>
-        {children}
-      </FormContext.Provider>
-    </form>
-  );
-});
+    const setInput = useCallback((input: Input) => {
+      return formData.current.setInput(input);
+    }, []);
+
+    useImperativeHandle(ref, () => ({
+      formData: formData.current,
+      submit: internalOnSubmit,
+    }));
+
+    return (
+      <form onSubmit={internalOnSubmit} {...props} noValidate>
+        <FormContext.Provider
+          value={{
+            formErrors: formErrors,
+            setFormErrors,
+            setInput,
+            hasBeenSubmitted,
+          }}
+        >
+          {children}
+        </FormContext.Provider>
+      </form>
+    );
+  })
+);
 Form.displayName = 'Form';
-
-class FormData {
-  public inputs: Input[] = [];
-
-  setInput(newInput: Input) {
-    const existingIdx = this.inputs.findIndex(
-      (input) => input.id === newInput.id
-    );
-    if (existingIdx > -1) {
-      this.inputs.splice(existingIdx, 1, newInput);
-    } else {
-      this.inputs.push(newInput);
-    }
-
-    return () => {
-      const existingIdx = this.inputs.findIndex(
-        (input) => input.id === newInput.id
-      );
-      if (existingIdx > -1) {
-        this.inputs.splice(existingIdx, 1);
-      }
-    };
-  }
-
-  resetValidation() {
-    this.inputs.forEach((input) => input.resetValidation());
-  }
-
-  get isValid(): boolean {
-    return this.inputs.every((input) => input.isValid);
-  }
-
-  get isInvalid(): boolean {
-    return !this.inputs.every((input) => input.isValid);
-  }
-
-  get isPending(): boolean {
-    return this.inputs.some(
-      (input) => input.validationState === ValidationState.PENDING
-    );
-  }
-}

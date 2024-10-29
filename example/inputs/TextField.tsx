@@ -28,7 +28,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
       value,
       validators,
       id,
-      ref
+      id
     );
 
     return (

@@ -1,33 +1,40 @@
-import { ValidationState } from '../../../src';
+import { Fragment } from 'react';
+import { useFormContext } from '../../../src/hooks/useFormContext';
 
-interface FormErrorProps {
-  validity: ValidationState;
-  errors: [fieldId: string, error: string][];
-  showErrors: boolean;
-}
+export const FormError = () => {
+  const context = useFormContext();
 
-export const FormError = ({ validity, errors, showErrors }: FormErrorProps) => {
-  if (validity !== ValidationState.INVALID) {
+  if (!context?.hasBeenSubmitted) {
     return null;
   }
 
-  if (!showErrors) {
-    return null;
-  }
-
-  if (errors.length === 0) {
+  if (
+    Object.values(context.formErrors).flatMap((errors) => errors).length === 0
+  ) {
     return null;
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      {errors.map(([fieldId, error]) => (
-        <span
-          id={createFormErrorId(fieldId, error)}
-          className="text-sm font-bold text-red-600"
-        >
-          {error}
-        </span>
+    <div className="flex flex-col gap-1 bg-red-200 p-4 border-red-600 border-2">
+      <h3>Form errors</h3>
+      {Object.entries(context.formErrors).map(([inputId, errors]) => (
+        <Fragment key={`form_errors_${inputId}`}>
+          {errors.map((error) => (
+            <a
+              key={createFormErrorId(inputId, error)}
+              role="alert"
+              aria-live="polite"
+              className="text-sm font-bold text-red-600 cursor-pointer hover:underline"
+              onClick={() =>
+                document
+                  .getElementById(inputId)
+                  ?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+              }
+            >
+              {error}
+            </a>
+          ))}
+        </Fragment>
       ))}
     </div>
   );

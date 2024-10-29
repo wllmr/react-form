@@ -1,4 +1,4 @@
-import { createContext, ReactNode, RefObject } from 'react';
+import { createContext, ReactNode } from 'react';
 import { ValidationState } from '../validators/Validator';
 
 export class Input {
@@ -9,7 +9,7 @@ export class Input {
     public validationState: ValidationState,
     public resetValidation: () => void,
     public errors: string[] | undefined,
-    public scrollToRef: RefObject<HTMLElement>
+    public scrollToId: string
   ) {}
 
   /**
@@ -25,6 +25,8 @@ export class Input {
 }
 
 export interface FormContextInterface {
+  formErrors: Record<string, string[]>;
+  setFormErrors: (inputId: string, errors: string[]) => void;
   setInput(input: Input): () => void;
   hasBeenSubmitted: boolean;
 }
