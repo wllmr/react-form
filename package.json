@@ -8,7 +8,7 @@
   "types": "dist/index.d.ts",
   "homepage": "http://wllmr.github.io/react-form",
   "scripts": {
-    "dev": "storybook dev -p 6006",
+    "dev": "tsc && vite serve",
     "build": "tsc && vite build",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
@@ -22,7 +22,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
-    "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.0",
     "@storybook/addon-backgrounds": "^8.2.9",
     "@storybook/addon-essentials": "^8.1.5",

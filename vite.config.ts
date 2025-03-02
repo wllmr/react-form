@@ -11,6 +11,14 @@ export default defineConfig({
       include: ['src/**/*.ts', 'src/**/*.tsx'],
     }),
   ],
+
+  root: path.resolve(__dirname, 'example'),
+
+  server: {
+    port: 3000,
+    open: true,
+  },
+
   build: {
     lib: {
       entry: 'src/index.tsx',
@@ -31,6 +39,7 @@ export default defineConfig({
       },
     },
   },
+
   resolve: {
     alias: {
       '@js-temporal/polyfill': path.resolve(

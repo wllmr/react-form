@@ -2,7 +2,6 @@ import { cx } from 'class-variance-authority';
 import {
   forwardRef,
   InputHTMLAttributes,
-  useId,
   useImperativeHandle,
   useRef,
 } from 'react';
@@ -13,13 +12,15 @@ import { Label } from './base/Label';
 
 export interface TextFieldProps
   extends InputHTMLAttributes<HTMLInputElement>,
-    InputBaseProps {}
+    InputBaseProps {
+  id: string;
+}
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
-  ({ label, className, type, value, validators, ...props }, forwardRef) => {
-    const customId = useId();
-    const id = props.id ?? customId;
+  ({ label, className, type, value, validators, id, ...props }, forwardRef) => {
     const ref = useRef<HTMLInputElement | null>(null);
+
+    console.count(`TextField -- ${id}`);
 
     useImperativeHandle(forwardRef, () => ref.current!, []);
 
