@@ -57,8 +57,13 @@ export const Form = memo(
       [onSubmit]
     );
 
+    const formErrorsRef = useRef<Record<string, string[]>>({});
     const setFormErrors = useCallback((inputId: string, errors: string[]) => {
-      _setFormErrors((formErrors) => ({ ...formErrors, [inputId]: errors }));
+      const currentErrors = formErrorsRef.current[inputId] || [];
+      if (JSON.stringify(currentErrors) === JSON.stringify(errors)) return;
+
+      formErrorsRef.current[inputId] = errors;
+      _setFormErrors({ ...formErrorsRef.current });
     }, []);
 
     const setInput = useCallback((input: Input) => {
