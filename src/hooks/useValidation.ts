@@ -66,7 +66,7 @@ export function useValidation(
     // Prevents async validators from updating the state if a new validation is started
     const hash = `${validationHash.current}`;
 
-    validate(value, validators, (validityResponse: ValidityResponse) => {
+    validate(value, validators, (newValidityResponse: ValidityResponse) => {
       if (hash !== validationHash.current) {
         return;
       }
@@ -74,15 +74,17 @@ export function useValidation(
       // If pending is returned then we keep potential errors while showing the pending state.
       // This is to reduce the flickering on the page.
       setValidityResponse((current) => {
-        console.log(current);
-        if (validityResponse[0] === ValidationState.PENDING) {
-          return [ValidationState.PENDING, errors];
+        if (
+          current[0] === newValidityResponse[0] &&
+          JSON.stringify(current[1]) === JSON.stringify(newValidityResponse[1])
+        ) {
+          return current; // Avoid unnecessary state update
         }
-        return validityResponse;
+        return newValidityResponse;
       });
 
-      if (validityResponse[0] !== ValidationState.PENDING) {
-        formContext?.setFormErrors(scrollToId, validityResponse[1]);
+      if (newValidityResponse[0] !== ValidationState.PENDING) {
+        formContext?.setFormErrors(scrollToId, newValidityResponse[1]);
       }
 
       // If the value is unreasonable then the validator can chose to active validation
@@ -101,25 +103,22 @@ export function useValidation(
   // This will not trigger if string ends up the same
   const serializedResponse = JSON.stringify(validityResponse);
 
+  const inputRef = useRef<Input>(
+    new Input(id, label, value, validity, () => {}, errors, scrollToId)
+  );
+
   useEffect(() => {
     const [deepCheckedValidity, deepCheckedErrors] = JSON.parse(
       serializedResponse
     ) as ValidityResponse;
 
-    const input = new Input(
-      id,
-      label,
-      value,
-      deepCheckedValidity,
-      () => {},
-      deepCheckedErrors,
-      scrollToId
-    );
-    const removeInput = formContext?.setInput(input);
+    const input = inputRef.current;
+    input.value = value;
+    input.validationState = deepCheckedValidity;
+    input.errors = deepCheckedErrors;
 
-    return () => {
-      removeInput?.();
-    };
+    const removeInput = formContext?.setInput(input);
+    return () => removeInput?.();
   }, [formContext, id, value, scrollToId, serializedResponse, label]);
 
   return response;
